@@ -27,16 +27,24 @@ app.post('/get/:id', function (req, res) {
   var data = req.body.data;
   if (!data) { res.send(500); return }
   if (!data.constructor === Array) data = [data];
-  var settings = {
+  // Reduce to an Array containing the selected HEP Field
+  var filtered_data = data.map(function (entry) {
+    return entry[config.cgrates.hep_field];
+  });
+  if (filtered_data === undefined || filtered_data.length == 0) {
+	res.status(500).end();
+  } else {
+    var settings = {
       "params": [
         {
-          "OriginIDs": data
+          "OriginIDs": filtered_data
         }
       ],
       "id": 0,
       "method": "ApierV2.GetCDRs"
-  };
-  getCGrates(settings, res);
+    };
+    getCGrates(settings, res);
+  }
 })
 
 app.listen(port, () => console.log('API Server started',port))
@@ -47,7 +55,7 @@ var getCGrates = function(settings, res){
     if (!settings || !settings.params) { res.status(404).end(); return; }
     req({
       method: 'POST',
-      url: config.cgrates_url || 'http://127.0.0.1:2080/jsonrpc',
+      url: config.cgrates.url || 'http://127.0.0.1:2080/jsonrpc',
       dataType: 'JSON',
       data: settings
     }, (err, response) => {
