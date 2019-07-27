@@ -14,7 +14,8 @@ var config = {
   debug: true,
   cgrates: {
 	"url": "api_url",
-	"tenant": "cgrates.org"
+	"tenant": "cgrates.org",
+	"hep_field": "callid"
   }
 };
 
